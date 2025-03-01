@@ -133,6 +133,24 @@ struct node *generate_code(struct node *root)
                     root->type = REG;
                     root->data = destreg;
                 }
+            } else if (root->data == NOT) { // Handles Unary NOT
+                if (left->type == REG) {
+                    if (reuse_reg(left->data)) {
+                        destreg = left->data;
+                    } else {
+                        destreg = assign_reg(-1);
+                        if (destreg == -1) {
+                            printf("Error: out of register\n");
+                            exit(-1);
+                        }
+                        release_reg(left->data);
+                    }
+                    sprintf(instr, "xori x%d, x%d, -1", destreg, left->data);
+                    printf("%s\n", instr);
+                    free(left);
+                    root->type = REG;
+                    root->data = destreg;
+                }
             }
         }
     }
