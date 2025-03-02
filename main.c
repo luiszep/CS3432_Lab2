@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 #include "build_tree.h"
+
+// Declare the function prototype
+int is_power_of_2(uint32_t n);
 
 int get_str(char s[], int lim)
 {
@@ -16,31 +20,24 @@ int get_str(char s[], int lim)
   
 void postorder(struct node *root)
 {
-    //Checks to see if node is empty. If empty, does nothing. Serves as final stopping condition.
-    if (root == NULL) return;
-
-    //Visit Left and Right Subtrees
-    //Moves in post order direction recursively
-    postorder(root->left);
-    postorder(root->right);
-
-    //Print the Current Node 
-    //After completing the left and right subtrees, we print the root node. 
-
-    //Prints a character as variable
-    if (root->type == VAR) {
-        printf("%c", 'a' + root->data);
-    }
-    //Prints number as constant
-    else if (root->type == CONST) {
-        printf("%d", root->data);
-    }
-    //Prints operator depending in Unary or Binaryop on the optable
-    else {
+    if (root) {
+      postorder(root->left);
+      postorder(root->right);
+      if (root->type == UNARYOP || root->type == BINARYOP){
         printf("%s", optable[root->data].symbol);
+      }
+      else if (root->type == VAR){
+        printf("%c", 'a' + (char)root->data); //deleted: 
+        //global variable of array of registers
+        //added: extern char *variableAtRegister[32];
+        //added: printf("%s\n", variableAtRegister[root->data]);
+      }
+      else{
+        printf("%d", root->data);
+      }
     }
-}
-
+  }
+  
 int main()
 {
     char expr1[MAXEXPRLENGTH];
@@ -62,5 +59,17 @@ int main()
         printregtable();
         printf("\n");
     }
+
+    // unsigned int test_nums[] = {1, 2, 4, 8, 16, 31, 64, 128, 256, 500, 1024, 2048, 4096, 8192};
+    // int expected[] = {0, 1, 2, 3, 4, 0, 6, 7, 8, 0, 10, 11, 12, 13};
+
+    // printf("Testing is_power_of_2 function:\n");
+    // for (int i = 0; i < sizeof(test_nums) / sizeof(test_nums[0]); i++) {
+        // int result = is_power_of_2(test_nums[i]);
+        // printf("is_power_of_2(%d) = %d (Expected: %d) %s\n", 
+               // test_nums[i], result, expected[i], 
+               // result == expected[i] ? "Success" : "Failure");
+    //}
+
     return 0;
 }

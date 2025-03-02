@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "build_tree.h"
 
+
 void remove_spaces(char* input){
     //tracks where to write characters, removing spaces through pointer to string.
     //moves through string reading characters one at a time
