@@ -55,7 +55,6 @@ int assign_reg(const int var) {
   return -1;
 }
 
-
 static int __release_reg(const int reg) {
   if (regtable[reg] > 0) {
     regtable[reg]--;
@@ -138,26 +137,9 @@ struct node *generate_code(struct node *root) {
         root->data = destreg;
       }//if left child node is a register and right child node is a constant
       else if ((left->type == REG) && (right->type == CONST)){
-        //if left has only been used once(1 occurence)
-        if (__reuse_reg(left->data) == 1) {
-          //destination register = right data
-          destreg = left->data;
-          //subtract number of ocurrences for left register by 1
-          __release_reg(right->data);
-        } 
-        //right node is either used more than once
-        else {
-          //find the next available register and assign it to destination register
-          destreg = assign_reg(-1);
-          //if there are no more available registers, print error
-          if (destreg == -1) {
-            printf("Error: out of registers\n");
-            exit(-1);
-          }
-          //subtract number of ocurrences for left register by 1
-          __release_reg(left->data);
-          
-        }
+        // Ensure we reuse the same register to maintain correct instruction order
+        destreg = left->data;
+
         //if assembly instruction is mul and the right operand is a power of 2, implement strength reduction by leftshiting 
         if(root->data == MUL && is_power_of_2((uint32_t)right->data)!=0){
           //note: we dont override operator node from mul to shift, we just change the print statement
@@ -178,7 +160,7 @@ struct node *generate_code(struct node *root) {
             printf("srai x%d, x%d, %d\n", destreg,left->data, reducedOperand);
           } 
         }//instruction is of normal immediate format
-        else{
+        else {
           //switch case for each different type of instruction
           switch(root->data) {
             case MUL:
@@ -222,7 +204,6 @@ struct node *generate_code(struct node *root) {
           }
         }
         //free left and right children nodes
-        free(left);
         free(right);
         //override root data to a register
         root->type = REG;
@@ -230,6 +211,8 @@ struct node *generate_code(struct node *root) {
         
       }//if left child node is a constant and right child node is a register
       else if ((left->type == CONST) && (right->type == REG)){
+        destreg = right->data;
+
         //if left is a constant and we are multiplying, we can rearrange the register if strength reduction is valid
         if(root->data == MUL && is_power_of_2((uint32_t)left->data)){
           //note: we dont override operator node from mul to shift, we just change the print statement
@@ -256,13 +239,12 @@ struct node *generate_code(struct node *root) {
             printf("slli x%d, x%d, %d\n", destreg,right->data, reducedOperand);
             //free children nodes
             free(left);
-            free(right);
             //override root to a register
             root->type=REG; 
             root->data=destreg;
           } 
         }
-        else{
+        else {
           //find a new register and add constant to new register using addi
           destreg = assign_reg(-1);
           printf("addi x%d, x0, %d\n",destreg,left->data);
@@ -275,7 +257,6 @@ struct node *generate_code(struct node *root) {
       }//if both left and right child nodes are constants
       else if ((left->type == CONST) && (right->type == CONST)){
         //find a new register to store them in
-        assign_reg(-1);
         root->type = CONST;
 
         //add if statements for all operators and do operations for both constants and assign to destreg

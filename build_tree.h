@@ -11,7 +11,6 @@
 enum nodetype{VAR, REG, CONST, UNARYOP, BINARYOP};
 enum ops{UMINUS, ADD, SUB, MUL, DIV, AND, OR, XOR, NOT, SLL, SRL, LPAREN, RPAREN};
 
-void initRegisters(void); //ADDED
 void init_regtable(void);
 void init_vartable(void);
 int assign_reg(int var);
@@ -48,4 +47,3 @@ struct nodestack {
     struct node *nodes[MAXNODES];
 };
 
-extern char *variableAtRegister[32]; //ADDED
